@@ -1,0 +1,20 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "nytohan.rarish@gmail.com",
+                "Name": "Nytohan"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "Use headsetcontrol to control",
+        "Icon": "battery",
+        "Id": "com.github.nytohan.kde-chatmix",
+        "Name": "KDE Chatmix Monitor",
+        "Version": "1",
+        "Website": ""
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-API": "declarativeappletscript",
+    "KPackageStructure": "Plasma/Applet"
+}
