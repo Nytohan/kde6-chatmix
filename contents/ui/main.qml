@@ -21,11 +21,11 @@ PlasmoidItem {
     preferredRepresentation: fullRepresentation
 
     function getBattPercent(){
-        battexec.exec("headsetcontrol -b | grep % | sed 's/Level:\ //' | sed 's/%//' | cut -f 2");
+        battexec.exec(plasmoid.configuration.BatteryCommand);
     }
 
     function getChatMixVal(){
-        mixexec.exec("headsetcontrol -m | grep Chatmix | sed 's/Chatmix:\ //' | cut -f 2");
+        mixexec.exec(plasmoid.configuration.ChatmixCommand);
     }
 
     function logprops(){
@@ -110,11 +110,11 @@ PlasmoidItem {
             Canvas {
 
                 id: volCanvas
-                width: parent.height*2
+                width: parent.height
                 height: width
 
                 onPaint: {
-
+                    //console.log("Painting")
                     var colors = {}
                     colors.chat     = plasmoid.configuration.ColorChat
                     colors.media    = plasmoid.configuration.ColorMedia
@@ -124,50 +124,83 @@ PlasmoidItem {
                     values.media    = root.props.media
                     values.chat     = root.props.chat
 
+                    //console.log("Chat: "+root.props.chat)
+                    //console.log("Media: "+root.props.media)
+
                     var ctx = getContext("2d");
+
+                    ctx.clearRect(0,0, volCanvas.width, volCanvas.height)
+
                     ctx.reset();
-                    ctx.scale(.5,.5)
-                    ctx.lineWidth = 24;
+                    //ctx.scale(.5,.5)
+                    ctx.lineWidth = 16;
 
-                    // Blank Arc
-                    //ctx.arc(x, y, r, startAngle, endAngle, <bool> clockwise); Angles are in PI Radians, Right = 0, 2, 4... Left = 1, 3... Clockwise by default.
+                    // Draw Audio Arcs
+                    if(root.props.state){
+                        // Blank Arc
+                        //ctx.arc(x, y, r, startAngle, endAngle, <bool> clockwise); Angles are in PI Radians, Right = 0, 2, 4... Left = 1, 3... Clockwise by default.
 
-                    ctx.strokeStyle = colors.unfilled;
-                    ctx.beginPath();
-                    context.translate(0.5,0.5);
+                        ctx.strokeStyle = colors.unfilled;
+                        ctx.beginPath();
+                        context.translate(0.5,0.5);
 
-                    // Paint full unfilled arc
-                    ctx.arc(volCanvas.width / 2, volCanvas.height / 2, (volCanvas.width / 2)-ctx.lineWidth, 1.5 * Math.PI, 2.5 * Math.PI);
-                    ctx.stroke();
+                        // Paint full unfilled arc
+                        ctx.arc(volCanvas.width / 2, volCanvas.height / 2, (volCanvas.width / 2)-ctx.lineWidth, 1.5 * Math.PI, 2.5 * Math.PI);
+                        ctx.stroke();
+                        ctx.closePath();
 
-                    // Chat Arc (Top)
-                    // Paint segment of the arc corresponding to Vol% of chat channel.
+                        // Chat Arc (Top)
+                        // Paint segment of the arc corresponding to Vol% of chat channel.
 
-                    ctx.strokeStyle = colors.chat;
-                    ctx.beginPath();
-                    //scontext.translate(0.5,0.5);
-                    ctx.arc(volCanvas.width / 2, volCanvas.height / 2, (volCanvas.width / 2)-ctx.lineWidth, 1.5 * Math.PI, 1.5 * Math.PI + (0.5*Math.PI)*values.chat/100);
-                    ctx.stroke();
+                        ctx.strokeStyle = colors.chat;
+                        ctx.beginPath();
+                        //scontext.translate(0.5,0.5);
+                        ctx.arc(volCanvas.width / 2, volCanvas.height / 2, (volCanvas.width / 2)-ctx.lineWidth, 1.5 * Math.PI, 1.5 * Math.PI + (0.5*Math.PI)*values.chat/100);
+                        ctx.stroke();
+                        ctx.closePath();
 
-                    // Media Arc (Bottom)
-                    // Paint segment of the arc corresponding to Vol% of media channel.
-                    ctx.strokeStyle = colors.media;
-                    ctx.beginPath();
-                    //context.translate(0.5,0.5);
-                    ctx.arc(volCanvas.width / 2, volCanvas.height / 2, (volCanvas.width / 2)-ctx.lineWidth, (0.5*Math.PI)*(100 - values.media)/100, 0.5 * Math.PI);
-                    ctx.stroke();
+                        // Media Arc (Bottom)
+                        // Paint segment of the arc corresponding to Vol% of media channel.
+                        ctx.strokeStyle = colors.media;
+                        ctx.beginPath();
+                        //context.translate(0.5,0.5);
+                        ctx.arc(volCanvas.width / 2, volCanvas.height / 2, (volCanvas.width / 2)-ctx.lineWidth, (0.5*Math.PI)*(100 - values.media)/100, 0.5 * Math.PI);
+                        ctx.stroke();
+                        ctx.closePath();
 
 
-                    ctx.textAlign = "right";
-                    ctx.textBaseline = "top";
-                    ctx.fillStyle = colors.chat
-                    ctx.font = "bold "+ctx.lineWidth+"px sans-serif";
-                    ctx.fillText("CHAT", volCanvas.width/2-ctx.lineWidth/2, ctx.lineWidth/4);
+                        ctx.textAlign = "right";
+                        ctx.textBaseline = "top";
+                        ctx.fillStyle = colors.chat
+                        ctx.font = "bold "+ctx.lineWidth+"px sans-serif";
+                        ctx.fillText("CHAT", volCanvas.width/2-ctx.lineWidth/2, ctx.lineWidth/4);
 
-                    ctx.textBaseline = "bottom";
-                    ctx.fillStyle = colors.media
-                    ctx.font = "bold "+ctx.lineWidth+"px sans-serif";
-                    ctx.fillText("MEDIA", volCanvas.width/2-ctx.lineWidth/2, volCanvas.height-ctx.lineWidth/4);
+                        ctx.textBaseline = "bottom";
+                        ctx.fillStyle = colors.media
+                        ctx.font = "bold "+ctx.lineWidth+"px sans-serif";
+                        ctx.fillText("MEDIA", volCanvas.width/2-ctx.lineWidth/2, volCanvas.height-ctx.lineWidth/4);
+                    } else {
+                        // Draw power symbol
+                        ctx.strokeStyle = colors.media;
+                        ctx.beginPath();
+                        context.translate(0.5,0.5);
+
+                        // Paint full unfilled arc
+                        ctx.arc(volCanvas.width / 2, volCanvas.height / 2, (volCanvas.width / 2)-ctx.lineWidth, 1.75 * Math.PI, 3.25 * Math.PI);
+                        ctx.stroke();
+                        ctx.closePath();
+
+                        ctx.strokeStyle = colors.chat;
+                        ctx.beginPath();
+                        ctx.moveTo(volCanvas.width / 2, volCanvas.height / 2)
+                        
+                        ctx.lineTo(volCanvas.width / 2, 0)
+                        ctx.stroke()
+                        ctx.closePath();
+
+                    }
+
+
                 }
                 layer.enabled: true
 
@@ -177,30 +210,33 @@ PlasmoidItem {
         Connections {
             target: mixexec
             function onExited (cmd, exitCode, exitStatus, stdout, stderr){
-                var midpoint = 64;
-                var value = stdout - midpoint;
-                var chat = 100;
-                var media = 100;
-                if(value < 0){
-                    media = 100;
-                    chat = Math.round(100 - (((value * -1)/64)*100));
-                } else {
-                    media = Math.round(100 - (((value)/64)*100));
-                    chat = 100;
-                }
-                
-                //mixLabel.text = "Chat: "+chat+"\nMedia: "+media;
+                //console.log("STDOUT: "+stdout)
+                if(root.props.state){
+                    var midpoint = 64;
+                    var value = stdout - midpoint;
+                    var chat = 100;
+                    var media = 100;
+                    if(value < 0){
+                        media = 100;
+                        chat = Math.round(100 - (((value * -1)/64)*100));
+                    } else {
+                        media = Math.round(100 - (((value)/64)*100));
+                        chat = 100;
+                    }
+                    
+                    //mixLabel.text = "Chat: "+chat+"\nMedia: "+media;
 
-                if(root.props.media != media){
-                    console.log("Media changed: "+ root.props.media + " => " + media)
-                    setvol.exec("pactl set-sink-volume \"Arctis Media\" "+media+"%")
-                    root.props.media = media;
-                }
+                    if(root.props.media != media){
+                        console.log("Media changed: "+ root.props.media + " => " + media)
+                        setvol.exec("pactl set-sink-volume \"Arctis Media\" "+media+"%")
+                        root.props.media = media;
+                    }
 
-                if(root.props.chat != chat){
-                    console.log("Chat changed: " + root.props.chat + " => " + chat)
-                    setvol.exec("pactl set-sink-volume \"Arctis Chat\" "+chat+"%")
-                    root.props.chat = chat;
+                    if(root.props.chat != chat){
+                        console.log("Chat changed: " + root.props.chat + " => " + chat)
+                        setvol.exec("pactl set-sink-volume \"Arctis Chat\" "+chat+"%")
+                        root.props.chat = chat;
+                    }
                 }
             }
         }
