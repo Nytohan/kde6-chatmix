@@ -137,12 +137,13 @@ PlasmoidItem {
 
                     // Draw Audio Arcs
                     if(root.props.state){
+
                         // Blank Arc
                         //ctx.arc(x, y, r, startAngle, endAngle, <bool> clockwise); Angles are in PI Radians, Right = 0, 2, 4... Left = 1, 3... Clockwise by default.
-
+        
                         ctx.strokeStyle = colors.unfilled;
                         ctx.beginPath();
-                        context.translate(0.5,0.5);
+                        ctx.translate(0.5,0.5);
 
                         // Paint full unfilled arc
                         ctx.arc(volCanvas.width / 2, volCanvas.height / 2, (volCanvas.width / 2)-ctx.lineWidth, 1.5 * Math.PI, 2.5 * Math.PI);
@@ -154,7 +155,6 @@ PlasmoidItem {
 
                         ctx.strokeStyle = colors.chat;
                         ctx.beginPath();
-                        //scontext.translate(0.5,0.5);
                         ctx.arc(volCanvas.width / 2, volCanvas.height / 2, (volCanvas.width / 2)-ctx.lineWidth, 1.5 * Math.PI, 1.5 * Math.PI + (0.5*Math.PI)*values.chat/100);
                         ctx.stroke();
                         ctx.closePath();
@@ -163,7 +163,7 @@ PlasmoidItem {
                         // Paint segment of the arc corresponding to Vol% of media channel.
                         ctx.strokeStyle = colors.media;
                         ctx.beginPath();
-                        //context.translate(0.5,0.5);
+                        ctx.translate(0.5,0.5);
                         ctx.arc(volCanvas.width / 2, volCanvas.height / 2, (volCanvas.width / 2)-ctx.lineWidth, (0.5*Math.PI)*(100 - values.media)/100, 0.5 * Math.PI);
                         ctx.stroke();
                         ctx.closePath();
@@ -179,11 +179,45 @@ PlasmoidItem {
                         ctx.fillStyle = colors.media
                         ctx.font = "bold "+ctx.lineWidth+"px sans-serif";
                         ctx.fillText("MEDIA", volCanvas.width/2-ctx.lineWidth/2, volCanvas.height-ctx.lineWidth/4);
+
+                        // Battery
+
+                        ctx.lineWidth = 1;
+                    ctx.strokeStyle = "white";
+                    
+                    var batt = {width:20, height: 30}
+                    var cap = batt.width/3
+                    var offset = {x:volCanvas.width/2, y:volCanvas.height/2-batt.height/2}
+                    ctx.lineWidth=1
+                    ctx.beginPath();
+                    
+                    // 100%
+                    switch(root.props.batt){
+                        case "100": ctx.fillStyle="#00BB00"
+                                    ctx.fillRect(offset.x, offset.y+batt.height, batt.width, -1*batt.height)
+                                    break;
+                        case "50":  ctx.fillStyle="#BBBB00"
+                                    ctx.fillRect(offset.x, offset.y+batt.height, batt.width, -1*batt.height/2)
+                                    break;
+                        case "0":   ctx.fillStyle="#AA0000"
+                                    ctx.fillRect(offset.x, offset.y+batt.height, batt.width, -1*batt.height/8)
+                                    break;
+
+                    }
+
+                    ctx.strokeRect(offset.x+0, offset.y+0, batt.width, batt.height)
+                    ctx.strokeRect(offset.x+cap, offset.y, cap, -1*(cap/2))
+
                     } else {
+
+
                         // Draw power symbol
                         ctx.strokeStyle = colors.media;
+                        ctx.lineCap = "round"
                         ctx.beginPath();
-                        context.translate(0.5,0.5);
+                        ctx.translate(0.5,0.5);
+                        
+
 
                         // Paint full unfilled arc
                         ctx.arc(volCanvas.width / 2, volCanvas.height / 2, (volCanvas.width / 2)-ctx.lineWidth, 1.75 * Math.PI, 3.25 * Math.PI);
@@ -194,12 +228,11 @@ PlasmoidItem {
                         ctx.beginPath();
                         ctx.moveTo(volCanvas.width / 2, volCanvas.height / 2)
                         
-                        ctx.lineTo(volCanvas.width / 2, 0)
+                        ctx.lineTo(volCanvas.width / 2, ctx.lineWidth)
                         ctx.stroke()
                         ctx.closePath();
 
                     }
-
 
                 }
                 layer.enabled: true
@@ -244,7 +277,7 @@ PlasmoidItem {
         Connections {
             target: battexec
             function onExited (cmd, exitCode, exitStatus, stdout, stderr){
-                root.props.batt = stdout;
+                root.props.batt = stdout.trim();
                 root.props.state = !!stdout;
                 if(root.props.state){
                     //battLabel.text = "Battery: " + stdout.trim();
