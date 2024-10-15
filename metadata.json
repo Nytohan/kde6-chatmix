@@ -9,7 +9,7 @@
         "Category": "System Information",
         "Description": "Use headsetcontrol to control",
         "Icon": "battery",
-        "Id": "com.github.nytohan.kde-chatmix",
+        "Id": "com.github.nytohan.kde6-chatmix",
         "Name": "KDE Chatmix Monitor",
         "Version": "1",
         "Website": ""
