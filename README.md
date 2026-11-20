@@ -12,5 +12,3 @@ Modify scripts/audio-links.sh to match your headset.
 Set up the audio-links.sh script to autostart however you prefer
 
 Add the widget to your desktop.
-
--
